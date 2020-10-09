@@ -153,11 +153,10 @@ public class Bank {
     }
 
     public void takeMoney(AutomaticTellerMachine atm) {
-
         System.out.println("请输入取款金额");
         BigDecimal operation = in.nextBigDecimal();
-        TotalBalence += operation.doubleValue();
         if (TotalBalence <= MAX_OPERATION && TotalBalence >= 0) {
+            TotalBalence += operation.doubleValue();
             System.out.println(atm.atmwithdraw(operation));
         } else {
             System.out.println("您今日取款已达上限5000元");
@@ -165,11 +164,9 @@ public class Bank {
     }
 
     public void saveMoney(AutomaticTellerMachine atm) {
-
         System.out.println("请输入存款金额");
         BigDecimal operation = in.nextBigDecimal();
         System.out.println(atm.atmDepoist(operation));
-
     }
 
     public void updatePassword(AutomaticTellerMachine atm) {
