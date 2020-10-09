@@ -176,7 +176,7 @@ public class Bank {
 
         System.out.println("请输入原密码：");
         count++;
-        //控制台获取原密码
+        //获取原密码
         Integer password = in.nextInt();
         //原密码正确，才可以继续修改密码
         if (password.equals(atm.getAccount().getAccountPassword())) {
@@ -208,6 +208,7 @@ public class Bank {
         } else {//原密码输入错误
             if (count >= 3) {
                 try {
+                    atm.setLogin(false);
                     throw new AccountException("您三次输入的密码都不正确！！！账号已被锁定", atm.getAccount());
                 } catch (AccountException e) {
                 }

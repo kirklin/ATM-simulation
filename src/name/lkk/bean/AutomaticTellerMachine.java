@@ -106,7 +106,10 @@ public class AutomaticTellerMachine {
             System.out.println("请输入账号：");
             Scanner in = new Scanner(System.in);
             BigInteger id = in.nextBigInteger();
-            account.setAccountId(id);
+            if (id.compareTo(account.getAccountId())!=0){
+                System.out.println("账号不存在");
+                return false;
+            }
             if (!loginAccount.isLock()){
                 for (int i = 0; i < 3; i++) {
                     System.out.println("请输入密码：");
