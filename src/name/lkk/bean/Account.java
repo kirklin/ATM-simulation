@@ -25,6 +25,10 @@ public abstract class Account {
      * 账户余额
      */
     private BigDecimal accountBalance;
+    /**
+     * 账号锁定状态
+     */
+    private boolean lock=false;
 
     public Account() {
     }
@@ -66,6 +70,14 @@ public abstract class Account {
 
     public void setAccountBalance(BigDecimal accountBalance) {
         this.accountBalance = accountBalance;
+    }
+
+    public boolean isLock() {
+        return lock;
+    }
+
+    public void setLock(boolean lock) {
+        this.lock = lock;
     }
 
     @Override
