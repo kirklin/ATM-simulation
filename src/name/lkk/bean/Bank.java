@@ -1,5 +1,7 @@
 package name.lkk.bean;
 
+import name.lkk.exception.AccountException;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -82,20 +84,20 @@ public class Bank {
         System.out.println("请按ID选择提款机:");
         AutomaticTellerMachine ATM = atms.get(chooseATM());
         System.out.println("请登陆您的账号");
-        ATM.isLogin();
-        while (ATM.isLogin()) {
-            System.out.println();
-            System.out.println("-----------------------------------------------------");
-            System.out.println("|                                                   |");
-            System.out.println("|                    请选择功能:                      |");
-            System.out.println("|                                                   |");
-            System.out.println("|       1.取款 2.存款 3.查询余额 4.修改密码 5.退出       |");
-            System.out.println("|                                                   |");
-            System.out.println("-----------------------------------------------------");
-            System.out.println();
-            menu(in.nextInt(), ATM);
+        while (true){
+            while (ATM.isLogin(ATM.getAccount())) {
+                System.out.println();
+                System.out.println("-----------------------------------------------------");
+                System.out.println("|                                                   |");
+                System.out.println("|                    请选择功能:                      |");
+                System.out.println("|                                                   |");
+                System.out.println("|       1.取款 2.存款 3.查询余额 4.修改密码 5.退出       |");
+                System.out.println("|                                                   |");
+                System.out.println("-----------------------------------------------------");
+                System.out.println();
+                menu(in.nextInt(), ATM);
+            }
         }
-
     }
 
     private void menu(int operation, AutomaticTellerMachine atm) {
@@ -191,7 +193,8 @@ public class Bank {
                     System.out.println("密码修改成功，即将重新登录！！！");
                     atm.getAccount().setAccountPassword(newpassword1);
                     atm.setLogin(false);
-                    atm.isLogin();//重新登录
+                    //重新登录
+                    atm.isLogin(atm.getAccount());
 
                 } else {//两次新密码输入不相同
                     System.out.println("您两次输入的新密码不相同，请重新操作！！！");
@@ -203,11 +206,11 @@ public class Bank {
             }
 
         } else {//原密码输入错误
-            //大于等于三次，系统自动退出
             if (count >= 3) {
-                System.out.println("您三次输入的密码都不正确！！！");
-                System.out.println("输入次数超限，即将退出ATM系统！！！");
-                System.exit(0);
+                try {
+                    throw new AccountException("您三次输入的密码都不正确！！！账号已被锁定", atm.getAccount());
+                } catch (AccountException e) {
+                }
             }
             System.out.println("您所输入的密码与原密码不相同，请重新输入：");
             //继续输入原密码

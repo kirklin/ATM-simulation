@@ -1,5 +1,8 @@
 package name.lkk.bean;
 
+import name.lkk.exception.AccountException;
+import name.lkk.exception.PasswordException;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Scanner;
@@ -95,28 +98,58 @@ public class AutomaticTellerMachine {
      *
      * @return
      */
-    public boolean isLogin() {
+    public boolean isLogin(Account loginAccount) {
         if (isLogin) {
             return true;
         } else {
             System.out.println("您还未登陆账号，请进行登陆操作");
-            for (int i = 0; i < 3; i++) {
-                Scanner in = new Scanner(System.in);
-                System.out.println("请输入账号：");
-                BigInteger id = in.nextBigInteger();
-                System.out.println("请输入密码：");
-                Integer pwd = in.nextInt();
-                if (isLogin = account.login(id, pwd)) {
-                    System.out.println("登陆成功");
-                    isLogin = true;
-                    break;
-                } else {
-                    isLogin = false;
-                    System.out.println("登录失败，" + "您还有" + (2 - i) + "次机会");
+            System.out.println("请输入账号：");
+            Scanner in = new Scanner(System.in);
+            BigInteger id = in.nextBigInteger();
+            account.setAccountId(id);
+            if (!loginAccount.isLock()){
+                for (int i = 0; i < 3; i++) {
+                    System.out.println("请输入密码：");
+                    Integer pwd = in.nextInt();
+                    if (isLogin = account.login(id, pwd)) {
+                        System.out.println("登陆成功");
+                        isLogin = true;
+                        break;
+                    } else {
+                        isLogin = false;
+                        try {
+                            throw new PasswordException("登录失败");
+                        } catch (PasswordException e) {
+                            System.out.println("您还有" + (2 - i) + "次机会");
+                        }
+                        if ((2-i)==0){
+                            try {
+                                throw new AccountException("您的账号已锁定",account);
+                            } catch (AccountException e) {
+                            }
+                        }
+                    }
                 }
+            }else{
+                System.out.println("您的账号已锁定，请联系人工客服");
+                return false;
             }
         }
         return isLogin;
     }
 
+    /**
+     * 判断账号锁定状态
+     * @return
+     */
+    public boolean isLock(){
+        return account.isLock();
+    }
+
+    /**
+     * 锁定账号
+     */
+    public void lockAccount(){
+        account.setLock(true);
+    }
 }
