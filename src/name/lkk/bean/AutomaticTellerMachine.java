@@ -5,6 +5,8 @@ import name.lkk.exception.PasswordException;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 /**
@@ -15,13 +17,12 @@ import java.util.Scanner;
 public class AutomaticTellerMachine {
     private String atmName;
     private int atmId;
-    private Account account;
-    private boolean isLogin;
+    private Map<Integer,Account> accountMap;
 
-    public AutomaticTellerMachine(String atmName, int atmId, Account account) {
+    public AutomaticTellerMachine(String atmName, int atmId, Map<Integer, Account> accountMap) {
         this.atmName = atmName;
         this.atmId = atmId;
-        this.account = account;
+        this.accountMap = accountMap;
     }
 
     public String getAtmName() {
@@ -40,16 +41,13 @@ public class AutomaticTellerMachine {
         this.atmId = atmId;
     }
 
-    public Account getAccount() {
-        return account;
+
+    public Map<Integer, Account> getAccountMap() {
+        return accountMap;
     }
 
-    public void setLogin(boolean login) {
-        isLogin = login;
-    }
-
-    public void setAccount(Account account) {
-        this.account = account;
+    public void setAccountMap(Map<Integer, Account> accountMap) {
+        this.accountMap = accountMap;
     }
 
     @Override
@@ -65,7 +63,7 @@ public class AutomaticTellerMachine {
      * @param money
      * @return
      */
-    public BigDecimal atmDepoist(BigDecimal money) {
+    public BigDecimal atmDepoist(BigDecimal money, Account account) {
         if (money.remainder(new BigDecimal(100.00)).compareTo(new BigDecimal(0.00)) == 0) {
             if (account.depoist(money)) {
                 System.out.println("存款成功");
@@ -84,7 +82,7 @@ public class AutomaticTellerMachine {
      * @param money
      * @return
      */
-    public BigDecimal atmwithdraw(BigDecimal money) {
+    public BigDecimal atmwithdraw(BigDecimal money, Account account) {
         if (money.remainder(new BigDecimal(100.00)).compareTo(new BigDecimal(0.00)) == 0) {
             account.withdraw(money);
         } else {
@@ -98,61 +96,55 @@ public class AutomaticTellerMachine {
      *
      * @return
      */
-    public boolean isLogin(Account loginAccount) {
-        if (isLogin) {
+
+    public boolean isLogin(Account account) {
+        if (account.isOnline() && !account.isLock()) {
             return true;
+        } else if (account.isOnline() && account.isLock()) {
+            System.out.println("您的账号已锁定，请联系人工客服");
+            return false;
         } else {
-            System.out.println("您还未登陆账号，请进行登陆操作");
-            System.out.println("请输入账号：");
             Scanner in = new Scanner(System.in);
-            BigInteger id = in.nextBigInteger();
-            if (id.compareTo(account.getAccountId())!=0){
-                System.out.println("账号不存在");
-                return false;
-            }
-            if (!loginAccount.isLock()){
-                for (int i = 0; i < 3; i++) {
-                    System.out.println("请输入密码：");
-                    Integer pwd = in.nextInt();
-                    if (isLogin = account.login(id, pwd)) {
-                        System.out.println("登陆成功");
-                        isLogin = true;
-                        break;
-                    } else {
-                        isLogin = false;
+            BigInteger id = account.getAccountId();
+            for (int i = 0; i < 3; i++) {
+                System.out.println("请输入密码：");
+                int pwd = in.nextInt();
+                if (account.login(id, pwd)) {
+                    System.out.println("登陆成功");
+                    account.setOnline(true);
+                    break;
+                } else {
+                    try {
+                        throw new PasswordException("登录失败");
+                    } catch (PasswordException e) {
+                        System.out.println("您还有" + (2 - i) + "次机会");
+                    }
+                    if ((2 - i) == 0) {
                         try {
-                            throw new PasswordException("登录失败");
-                        } catch (PasswordException e) {
-                            System.out.println("您还有" + (2 - i) + "次机会");
-                        }
-                        if ((2-i)==0){
-                            try {
-                                throw new AccountException("您的账号已锁定",account);
-                            } catch (AccountException e) {
-                            }
+                            throw new AccountException("您的账号已锁定", account);
+                        } catch (AccountException e) {
+                            return false;
                         }
                     }
                 }
-            }else{
-                System.out.println("您的账号已锁定，请联系人工客服");
-                return false;
             }
         }
-        return isLogin;
+        return account.isOnline();
     }
 
     /**
      * 判断账号锁定状态
+     *
      * @return
      */
-    public boolean isLock(){
+    public boolean isLock(Account account) {
         return account.isLock();
     }
 
     /**
      * 锁定账号
      */
-    public void lockAccount(){
+    public void lockAccount(Account account) {
         account.setLock(true);
     }
 }

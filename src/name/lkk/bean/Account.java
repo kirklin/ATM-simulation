@@ -28,7 +28,8 @@ public abstract class Account {
     /**
      * 账号锁定状态
      */
-    private boolean lock=false;
+    private boolean lock = false;
+    private boolean online = false;
 
     public Account() {
     }
@@ -116,6 +117,22 @@ public abstract class Account {
     public boolean login(BigInteger accountId, Integer accountPassword) {
         return this.accountId.compareTo(accountId) == 0
                 && this.accountPassword.intValue() == accountPassword.intValue();
+    }
+
+    /**
+     * 账号在线状态
+     * @return
+     */
+    public boolean isOnline() {
+        return online;
+    }
+
+    /**
+     * 设置账号在线状态
+     * @param online
+     */
+    public void setOnline(boolean online) {
+        this.online = online;
     }
 }
 

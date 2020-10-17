@@ -16,6 +16,7 @@ public class AccountException extends RuntimeException{
     public AccountException(String msg, Account account){
         super(msg);
         account.setLock(true);
+        account.setOnline(false);
         System.out.println("您的账号已锁定，请联系人工客服");
     }
 
