@@ -39,8 +39,8 @@ public class Bank {
      */
     public static synchronized Bank getInstance() {
         if (instance == null) {
-            Map<Integer,Account> accountMap = new HashMap<>();
-            accountMap.put(123456,new SavingAccount(new BigInteger("123456"), "KK",
+            Map<Integer, Account> accountMap = new HashMap<>();
+            accountMap.put(123456, new SavingAccount(new BigInteger("123456"), "KK",
                     123456, new BigDecimal(10000)));
             List<AutomaticTellerMachine> automaticTellerMachineList = new ArrayList<>();
             automaticTellerMachineList.add(new AutomaticTellerMachine("一号取款机", 1, accountMap));
@@ -81,45 +81,53 @@ public class Bank {
         System.out.println("请按ID选择提款机:");
         AutomaticTellerMachine ATM = atms.get(chooseATM());
         Map<Integer, Account> accountMap = ATM.getAccountMap();
-        while (true){
-            System.out.println("请登陆您的账号");
-            int accountId = in.nextInt();
-            //判断账号是否存在
-            if (accountMap.containsKey(accountId)){
+        while (true) {
+            System.out.println("是否进入人工服务，按Y/y进入，其他任意键则不进入");
+            String ser = in.next();
+            if (ser.equals("Y") || ser.equals("y")) {
+                customerService(ATM);
+            } else {
+                System.out.println("欢迎进入自助服务");
+                System.out.println("请登陆您的账号");
+                int accountId = in.nextInt();
+                //判断账号是否存在
+                if (accountMap.containsKey(accountId)) {
 
-                if (accountMap.get(accountId).isLock()){
-                    System.out.println("您的账号已锁定，请联系人工客服");
-                }else{
-                    //登陆账号
-                    ATM.isLogin(accountMap.get(accountId));
-                    while (accountMap.get(accountId).isOnline()) {
-                        System.out.println();
-                        System.out.println("-----------------------------------------------------");
-                        System.out.println("|                                                   |");
-                        System.out.println("|                    请选择功能:                      |");
-                        System.out.println("|                                                   |");
-                        System.out.println("|       1.取款 2.存款 3.查询余额 4.修改密码 5.注销       |");
-                        System.out.println("|                                                   |");
-                        System.out.println("-----------------------------------------------------");
-                        System.out.println();
-                        menu(in.nextInt(),ATM,accountMap.get(accountId));
+                    if (accountMap.get(accountId).isLock()) {
+                        System.out.println("您的账号已锁定，请联系人工客服");
+                    } else {
+                        //登陆账号
+                        ATM.isLogin(accountMap.get(accountId));
+                        while (accountMap.get(accountId).isOnline()) {
+                            System.out.println();
+                            System.out.println("-----------------------------------------------------");
+                            System.out.println("|                                                   |");
+                            System.out.println("|                    请选择功能:                      |");
+                            System.out.println("|                                                   |");
+                            System.out.println("|       1.取款 2.存款 3.查询余额 4.修改密码 5.注销       |");
+                            System.out.println("|                                                   |");
+                            System.out.println("-----------------------------------------------------");
+                            System.out.println();
+                            menu(in.nextInt(), ATM, accountMap.get(accountId));
+                        }
                     }
+                } else {
+                    System.out.println("账号不存在");
                 }
-            }else{
-                System.out.println("账号不存在");
             }
+
         }
     }
 
-    private void menu(int operation, AutomaticTellerMachine atm,Account account) {
+    private void menu(int operation, AutomaticTellerMachine atm, Account account) {
         switch (operation) {
             case 1:
                 //1.取款
-                takeMoney(atm,account);
+                takeMoney(atm, account);
                 break;
             case 2:
                 //2.存款
-                saveMoney(atm,account);
+                saveMoney(atm, account);
                 break;
             case 3:
                 //3.查询余额
@@ -127,7 +135,7 @@ public class Bank {
                 break;
             case 4:
                 //4.修改密码
-                updatePassword(atm,account);
+                updatePassword(atm, account);
                 break;
             case 5:
                 //5.注销
@@ -163,25 +171,43 @@ public class Bank {
         return atmId - 1;
     }
 
-    public void takeMoney(AutomaticTellerMachine atm,Account account) {
+    /**
+     * 取款
+     *
+     * @param atm
+     * @param account
+     */
+    public void takeMoney(AutomaticTellerMachine atm, Account account) {
         System.out.println("请输入取款金额");
         BigDecimal operation = in.nextBigDecimal();
         if (TotalBalence <= MAX_OPERATION && TotalBalence >= 0) {
             TotalBalence += operation.doubleValue();
-            System.out.println(atm.atmwithdraw(operation,account));
+            System.out.println(atm.atmwithdraw(operation, account));
         } else {
             System.out.println("您今日取款已达上限5000元");
         }
     }
 
-    public void saveMoney(AutomaticTellerMachine atm,Account account) {
+    /**
+     * 存款
+     *
+     * @param atm
+     * @param account
+     */
+    public void saveMoney(AutomaticTellerMachine atm, Account account) {
         System.out.println("请输入存款金额");
         BigDecimal operation = in.nextBigDecimal();
-        System.out.println(atm.atmDepoist(operation,account));
+        System.out.println(atm.atmDepoist(operation, account));
     }
 
-    public void updatePassword(AutomaticTellerMachine atm,Account account) {
-        if (account.isOnline()&&!account.isLock()){
+    /**
+     * 更新密码
+     *
+     * @param atm
+     * @param account
+     */
+    public void updatePassword(AutomaticTellerMachine atm, Account account) {
+        if (account.isOnline() && !account.isLock()) {
             count++;
             //获取原密码
             System.out.println("请输入原密码：");
@@ -193,9 +219,9 @@ public class Bank {
                 Integer newPassword1 = in.nextInt();
 
                 //判断是否是六位数密码
-                if (newPassword1.toString().length()==PASSWORD_LENGTH) {
+                if (newPassword1.toString().length() == PASSWORD_LENGTH) {
                     //判断六位密码是否相同
-                    if (Integer.parseInt(newPassword1.toString())%VERIFICATION_SAME_PWD!=0) {
+                    if (Integer.parseInt(newPassword1.toString()) % VERIFICATION_SAME_PWD != 0) {
                         System.out.println("请再次输入新密码：");
                         Integer newPassword2 = in.nextInt();
                         //两次新密码匹配成功
@@ -208,16 +234,14 @@ public class Bank {
                             System.out.println("您两次输入的新密码不相同,请重新操作！！！");
                             updatePassword(atm, account);
                         }
-                    }else{
+                    } else {
                         System.out.println("密码不能为相同的六位数");
                     }
                 } else {
                     System.out.println("新密码必须为六位数");
-                    updatePassword(atm,account);
+                    updatePassword(atm, account);
                 }
-
             } else {//原密码输入错误,或者账号被锁定
-
                 if (count >= 3) {
                     try {
                         account.setOnline(false);
@@ -227,15 +251,87 @@ public class Bank {
                         return;
                     }
                 }
-                System.out.println("您所输入的密码与原密码不相同，"+"剩余"+(3-count)+"次机会"+"，请重新输入：");
+                System.out.println("您所输入的密码与原密码不相同，" + "剩余" + (3 - count) + "次机会" + "，请重新输入：");
                 //继续输入原密码
-                updatePassword(atm,account);
+                updatePassword(atm, account);
             }
-        }else {
-            return;
         }
+    }
 
+    /**
+     * 开户
+     *
+     * @param atm
+     */
+    public boolean addAccount(AutomaticTellerMachine atm) {
+        Map<Integer, Account> accountMap = atm.getAccountMap();
+        System.out.println("请输入您要注册的账号：");
+        int accountId = in.nextInt();
+        if (accountMap.containsKey(accountId)) {
+            return false;
+        } else {
+            System.out.println("恭喜你，账号可以注册，请输入账号名：");
+            String accountName = in.next().trim();
+            accountMap.put(accountId, new SavingAccount(new BigInteger(String.valueOf(accountId)), accountName,
+                    123456, new BigDecimal(10000)));
+            return true;
+        }
+    }
 
+    /**
+     * 销户
+     */
+    public void cancellationAccount(AutomaticTellerMachine atm) {
+
+    }
+
+    /**
+     * 客户服务
+     */
+    public void customerService(AutomaticTellerMachine atm) {
+        while (true) {
+            System.out.println("请选择功能：");
+            System.out.println("1.开户  2.销户  3.解锁账号 4.进入自助服务");
+            int operation = in.nextInt();
+            boolean exit = false;
+            switch (operation) {
+                case 1:
+                    //1.开户
+                    boolean flag = addAccount(atm);
+                    if (flag) {
+                        System.out.println("开户成功");
+                    } else {
+                        System.out.println("开户失败，账号重复");
+                    }
+                    break;
+                case 2:
+                    //2.销户
+                    cancellationAccount(atm);
+                    break;
+                case 3:
+                    //3.解锁
+                    Map<Integer, Account> accountMap = atm.getAccountMap();
+                    System.out.println("请输入你要解锁的账号：");
+                    int accountId = in.nextInt();
+                    if (accountMap.containsKey(accountId)) {
+                        accountMap.get(accountId).setLock(false);
+                        System.out.println("解锁成功");
+                    } else {
+                        System.out.println("账号不存在");
+                    }
+                    break;
+                case 4:
+                    //4.进入自助服务
+                    exit = true;
+                    break;
+                default:
+                    System.out.println("你输入有误！请重新输入！！！");
+                    break;
+            }
+            if (exit) {
+                break;
+            }
+        }
     }
 }
 
